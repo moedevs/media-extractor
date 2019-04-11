@@ -12,6 +12,8 @@ Actually... it's an html file. Yes, have fun saving that in a database and tryin
 
 ## Usage
 
+`npm install media-extractor`
+
 ```js
 const { resolve } = require("media-extractor");
 
