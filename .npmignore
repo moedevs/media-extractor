@@ -3,3 +3,4 @@ src/
 .idea/
 tsconfig.json
 tslint.json
+dist/test.js
