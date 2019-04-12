@@ -1,3 +1,5 @@
 src/
 .vscode/
 .idea/
+tsconfig.json
+tslint.json
