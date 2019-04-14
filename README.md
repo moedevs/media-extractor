@@ -34,3 +34,10 @@ These links **cannot** be generated without an http request:
 
 - `tenor.com/view`
 - `tenor.com/*.gif`
+
+
+### Contributing
+Please make sure to add tests for each new endpoint to make 
+sure they're supported.
+
+You can run the tests with `npm t`
