@@ -1,5 +1,9 @@
 import needle from "needle";
 import { HTMLElement, parse, TextNode } from "node-html-parser";
+import { createWindow } from "domino"
+// @ts-ignore
+import { getMetadata } from "page-metadata-parser";
+import { MediaClientOptions, ReturnTypes } from "media-extractor";
 
 type QuerySelector = string;
 type ImageSrc = string;
@@ -8,6 +12,10 @@ type ParseResult = (TextNode & {
 }) | (HTMLElement & {
   valid: boolean;
 });
+
+const precedence = [
+
+];
 
 type Matcher = [(url: string) => boolean, (selector: ParseResult) => ImageSrc]
 type SimplifiedMatcher = [RegExp, QuerySelector];
@@ -82,4 +90,9 @@ export const resolve = async (url: string) => {
   return extractGeneric(url, resp.body);
 };
 
-
+export const metadata = async (url: string) => {
+  const res = await get(url);
+  const { document } = createWindow(res.body);
+  const mtd = getMetadata(document, url);
+  return mtd;
+};
