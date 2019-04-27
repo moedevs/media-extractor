@@ -1,19 +1,17 @@
+import axios, { AxiosInstance } from "axios";
+import { createWindow } from "domino";
 import {
   IMediaClient,
   MediaClientOptions,
-  MediaClientSettings, ResolveResponse,
-  ResolveTypes,
-  ResolveMap
+  MediaClientSettings, MediaTypes,
+  ResolveMap,
+  ResolveResponse, ResolveTypes
 } from "media-extractor";
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { createWindow } from "domino";
+import { extension } from "mime-types";
 // @ts-ignore
 import { getMetadata } from "page-metadata-parser";
-import { extension } from "mime-types";
 
-class MediaClient<T extends ResolveTypes = "url"> implements IMediaClient<T> {
-  public readonly opts: MediaClientSettings<T>;
-  private readonly axios: AxiosInstance;
+export class MediaClient<T extends ResolveTypes = "url"> implements IMediaClient<T> {
   private static defaultOpts: MediaClientSettings<"url"> = {
     downloadNonUrl: false,
     returnAs: "url",
@@ -21,10 +19,33 @@ class MediaClient<T extends ResolveTypes = "url"> implements IMediaClient<T> {
     accept: [],
     hash: false
   };
+  public readonly opts: MediaClientSettings<T>;
+  private readonly axios: AxiosInstance;
 
   constructor(opts: MediaClientOptions<T> = {}) {
     this.opts = { ...MediaClient.defaultOpts, ...opts } as MediaClientSettings<T>;
     this.axios = this.generateAxios(this.opts.returnAs);
+  }
+
+  public async resolve(url: string): Promise<ResolveResponse<T> | undefined> {
+    const mtd = await this.metadata(url);
+
+    const format = extension(mtd._type) as MediaTypes;
+    const isAlreadyImage = ["gif", "png", "jpeg", "jpg"].some((mme) => format === mme);
+
+    if (isAlreadyImage) {
+      return {
+        ...await this.resolveImage(url, this.opts.returnAs),
+        format,
+        url
+      };
+    }
+
+    if (!mtd.image) {
+      return;
+    }
+
+    return await this.processRequest(mtd.image, this.opts.returnAs);
   }
 
   private generateAxios(opt: T) {
@@ -40,47 +61,41 @@ class MediaClient<T extends ResolveTypes = "url"> implements IMediaClient<T> {
   private async metadata(url: string) {
     const res = await axios.get(url);
     const { document } = createWindow(res.data);
-    return getMetadata(document, url);
-  };
+    return {
+      ...getMetadata(document, url),
+      _type: res.headers["content-type"]
+    };
+  }
 
-  private async convertUrl(url: string, type: T): Promise<ResolveMap[T]> {
-    const out = { type };
+  private async resolveImage(url: string, type: T): Promise<{ image: ResolveMap[T], type: T }> {
+    const get = (responseType: string) => this.axios.get(url, { responseType }).then(({ data }) => ({
+      type,
+      image: data
+    }));
+
     if (type === "url") {
-      return url;
+      return { type, image: url };
     } else if (type === "buffer") {
-      return this.axios.get(url, { responseType: "arraybufffer" }).then(e => e.data);
+      return get("arraybufffer");
     } else if (type === "stream") {
-      return this.axios.get(url, { responseType: "stream" }).then(e => e.data)
+      return get("stream");
     } else {
       throw Error(`${type} is not a valid response type`);
     }
   }
 
-  private async resolveImage(url: string, type: T): Promise<{ image: ResolveMap[T], type: string } | undefined> {
+  private async processRequest(url: string, type: T): Promise<ResolveResponse<T> | undefined> {
     const data = await axios.head(url);
-    const mimeType = extension(data.headers['content-type']);
-    const image = this.resolveImage(url, type);
-    console.log(data.headers);
-    return {
-      image,
-      type: 
-    }
-  };
+    const format = extension(data.headers["content-type"]) as MediaTypes | false;
 
-  public async resolve(url: string): Promise<ResolveResponse<T> | undefined> {
-    const mtd = await this.metadata(url);
-
-    if (!mtd.image) {
+    if (format === false) {
       return;
     }
 
-    const data = await axios.head(url);
-    const contentType = data.headers['content-type'];
-    const mimeType = extension(contentType);
-
     return {
-      image: Buffer.from(""),
-      type: this.opts.returnAs
+      ...await this.resolveImage(url, type),
+      format,
+      url
     };
   }
 }

@@ -26,7 +26,7 @@ declare module "media-extractor" {
     readonly buffer: Buffer
     // /**
     //  * Resolves into URL if avaiable, if not,
-    //  * downloads them and returns a stream 
+    //  * downloads them and returns a stream
     //  */
     // readonly urlOrStream: string | Stream;
   }
@@ -87,6 +87,10 @@ declare module "media-extractor" {
 
   interface ResolveResponse<T extends ResolveTypes> {
     /**
+     * Url the media was fetched from
+     */
+    url: string;
+    /**
      * Image response can be a url, buffer or stream
      */
     image: ResolveMap[T];
@@ -97,7 +101,9 @@ declare module "media-extractor" {
     /**
      * Type of the response
      */
-    type: MediaTypes
+    format: MediaTypes
+
+    type: T;
   }
 
   interface IMediaClient<T extends ResolveTypes = "url"> {

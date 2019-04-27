@@ -2,19 +2,17 @@
  * Discarding query parameters
  * @param url
  */
+import { MediaClient } from "../client";
+
 export const replaceQuery = (url: string) => url.replace(/\?.+/, '');
 
-/**
- * Matching urls to be equal
- * @param url
- */
-export const match = (url: string) => (out: string) =>
-  expect(url).toEqual(out);
+export const generateMatcher = (client: MediaClient) => (url: string, target: string) => () =>
+  client.resolve(url).then(out => {
+    if (!out) {
+      throw Error(out);
+    }
+    expect(replaceQuery(out!.image)).toEqual(replaceQuery(target));
+  });
 
-/**
- * Matching urls while discarding the query parameters
- * @param url
- */
-export const looseMatch = (url: string) => (out: string) =>
-  expect(replaceQuery(url)).toEqual(replaceQuery(out));
-
+const client = new MediaClient();
+export const match = generateMatcher(client);
