@@ -2,9 +2,10 @@ import {
   IMediaClient,
   MediaClientOptions,
   MediaClientSettings, ResolveResponse,
-  ResolveTypes
+  ResolveTypes,
+  ResolveMap
 } from "media-extractor";
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { createWindow } from "domino";
 // @ts-ignore
 import { getMetadata } from "page-metadata-parser";
@@ -39,14 +40,31 @@ class MediaClient<T extends ResolveTypes = "url"> implements IMediaClient<T> {
   private async metadata(url: string) {
     const res = await axios.get(url);
     const { document } = createWindow(res.data);
-    const mtd = getMetadata(document, url);
-    return mtd;
+    return getMetadata(document, url);
   };
 
-  private async resolveImage(url: string, type: T) {
+  private async convertUrl(url: string, type: T): Promise<ResolveMap[T]> {
+    const out = { type };
+    if (type === "url") {
+      return url;
+    } else if (type === "buffer") {
+      return this.axios.get(url, { responseType: "arraybufffer" }).then(e => e.data);
+    } else if (type === "stream") {
+      return this.axios.get(url, { responseType: "stream" }).then(e => e.data)
+    } else {
+      throw Error(`${type} is not a valid response type`);
+    }
+  }
+
+  private async resolveImage(url: string, type: T): Promise<{ image: ResolveMap[T], type: string } | undefined> {
     const data = await axios.head(url);
     const mimeType = extension(data.headers['content-type']);
+    const image = this.resolveImage(url, type);
     console.log(data.headers);
+    return {
+      image,
+      type: 
+    }
   };
 
   public async resolve(url: string): Promise<ResolveResponse<T> | undefined> {

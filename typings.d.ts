@@ -12,9 +12,23 @@ declare module "media-extractor" {
    * @private Mapping of input strings to output types
    */
   interface ResolveMap {
+    /**
+     * Resolves into a URL (if available)
+     */
     readonly url: string,
+    /**
+     * Downloads relevant images and resolves into a stream
+     */
     readonly stream: Stream,
+    /**
+     * Downloads relevant images and resolves into a buffer
+     */
     readonly buffer: Buffer
+    // /**
+    //  * Resolves into URL if avaiable, if not,
+    //  * downloads them and returns a stream 
+    //  */
+    // readonly urlOrStream: string | Stream;
   }
 
   type ResolveTypes = keyof ResolveMap;
@@ -34,6 +48,7 @@ declare module "media-extractor" {
     readonly downloadNonUrl: boolean;
     /**
      * Return types of images
+     * Note: not every image might be available in url form
      *
      * @link {@ResolveType}
      * @default "url"
@@ -65,6 +80,9 @@ declare module "media-extractor" {
     readonly hash: boolean;
   }
 
+  /**
+   * Options for the MediaClient constructor
+   */
   type MediaClientOptions<T extends ResolveTypes> = Partial<MediaClientSettings<T>>;
 
   interface ResolveResponse<T extends ResolveTypes> {
