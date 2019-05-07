@@ -11,7 +11,7 @@ export const generateMatcher = (client: MediaClient) => (url: string, target: st
     if (!out) {
       throw Error(out);
     }
-    expect(replaceQuery(out!.image)).toEqual(replaceQuery(target));
+    return expect(replaceQuery(out!.image)).toEqual(replaceQuery(target));
   });
 
 const client = new MediaClient();

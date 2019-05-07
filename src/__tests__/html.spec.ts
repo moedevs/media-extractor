@@ -1,8 +1,4 @@
-import { MediaClient } from "../client";
-import { generateMatcher } from "./utils";
-
-const client = new MediaClient();
-const match = generateMatcher(client);
+import { match } from "./utils";
 
 test("tenor.com:gif", match(
   "https://tenor.com/YpQf.gif",
@@ -22,5 +18,10 @@ test("reddit.com:jpg", match(
 test("gfycat.com:gif", match(
   "https://gfycat.com/flashyteemingamericancrow-pets-animals-screaming-goat-original",
   "https://thumbs.gfycat.com/FlashyTeemingAmericancrow-size_restricted.gif"
+));
+
+test("pixiv:png", match(
+  "https://www.pixiv.net/member_illust.php?mode=medium&illust_id=58103553",
+  "https://embed.pixiv.net/decorate.php?illust_id=58103553"
 ));
 
