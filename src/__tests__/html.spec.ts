@@ -25,3 +25,12 @@ test("pixiv:png", match(
   "https://embed.pixiv.net/decorate.php?illust_id=58103553"
 ));
 
+test("imgbb:png", match(
+  "https://ibb.co/qNfjgxM",
+  "https://i.ibb.co/7n5CpbJ/57673381-p0.png"
+))
+
+test("imgur:png", match(
+  "https://imgur.com/gallery/nhgYU4J",
+  "https://i.imgur.com/nhgYU4J.png"
+))
