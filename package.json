@@ -11,7 +11,9 @@
   "scripts": {
     "test": "jest --verbose",
     "build": "tsc",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +31,8 @@
     "debug": "^4.1.1",
     "jsdom": "^14.0.0",
     "needle": "^2.3.0",
-    "node-html-parser": "^1.1.15"
-  }
+    "node-html-parser": "^1.1.15",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
