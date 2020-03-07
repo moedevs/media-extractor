@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "jsdom": "^14.0.0",
+    "jsdom": "^15.2.0",
     "needle": "^2.3.0",
     "node-html-parser": "^1.1.15"
   }
